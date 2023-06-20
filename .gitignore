@@ -1,0 +1,12 @@
+# R stuff
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+cta-project.Rproj
+
+# folders
+CSV/
+SHP/
+incomplete/
