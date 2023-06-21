@@ -98,7 +98,7 @@ bus_shape_ridership_plot <- ggplot(chicago) +
   )
 
 ggdraw(bus_shape_ridership_plot) +
-  theme(panel.background = element_rect(fill = "gray10", color = NA))
+  theme(panel.background = element_rect(fill = "gray10", color = "gray10"))
 ```
 
 ![](bus-ridership_map_files/figure-commonmark/Map%20Ridership-1.png)
