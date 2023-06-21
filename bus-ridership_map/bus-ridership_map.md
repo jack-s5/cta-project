@@ -1,0 +1,104 @@
+# bus-ridership_map
+
+``` r
+library(tidyverse)
+library(sf)
+library(RSocrata)
+library(here)
+library(scales)
+library(cowplot)
+library(extrafont)
+```
+
+``` r
+bus_ridership <- read.socrata("https://data.cityofchicago.org/resource/bynn-gwxy.csv") %>% 
+  filter(month_beginning >= "2022-01-01" & month_beginning < "2023-01-01")
+
+bus_route_shapes <- read_sf(here("SHP", "CTA_BusRoutes", "doc.kml"))
+
+chicago <- read_sf(here("SHP", "SHP_chicago", "geo_export_6f93926e-339f-47f5-acfa-9e4f37b816ce.shp"))
+
+extrafont::font_import(paths = NULL, recursive = TRUE, prompt = TRUE, pattern = "SpaceGrotesk")
+extrafont::loadfonts()
+```
+
+``` r
+ggplot(chicago) +
+  geom_sf() +
+  geom_sf(data = bus_route_shapes, inherit.aes = FALSE)
+```
+
+![](bus-ridership_map_files/figure-commonmark/Map%20Shapes-1.png)
+
+``` r
+# Looks good
+```
+
+``` r
+bus_ridership_2022 <- bus_ridership %>% 
+  group_by(route) %>% 
+  summarize(total_riders = sum(monthtotal))
+```
+
+``` r
+bus_shape_ridership <- bus_route_shapes %>% 
+  left_join(bus_ridership_2022, by = c("Name" = "route"))
+```
+
+``` r
+bus_shape_ridership_plot <- ggplot(chicago) +
+  geom_sf(fill = "gray30",
+          color = "black",
+          linewidth = 0.8) +
+  geom_sf(data = bus_shape_ridership, 
+          aes(color = total_riders),
+          inherit.aes = FALSE
+  ) +
+  labs(
+    title = "2022 CTA Bus Ridership",
+    color = "Total Riders",
+    caption = "From the Chicago Data Portal"
+  ) +
+  scale_color_viridis_c(
+    option = "plasma",
+    labels = scales::label_number(scale_cut = cut_short_scale()),
+    guide = guide_colorbar(barheight = 5,
+                          ticks.colour = "black", 
+                          ticks.linewidth = 2/.pt,
+                          draw.llim = TRUE,
+                          draw.ulim = TRUE,
+                          frame.colour = "black",
+                          frame.linewidth = 2/.pt)
+  ) +
+  theme(plot.background = element_rect(color = "gray10",
+                                       fill = "gray10"),
+        panel.background = element_blank(),
+        
+        panel.grid = element_blank(),
+        
+        plot.title = element_text(color = "white",
+                                  family = "Space Grotesk Bold",
+                                  size = 20,
+                                  hjust = 0.5),
+        plot.title.position = "plot",
+        
+        plot.caption = element_text(color = "gray90",
+                                    family = "Space Grotesk"),
+        
+        axis.text = element_blank(),
+        
+        legend.background = element_rect(fill = "gray10",
+                                         color = NA),
+        legend.title = element_text(color = "white",
+                                   family = "Space Grotesk"),
+        legend.text = element_text(color = "white",
+                                   family = "Space Grotesk"),
+        
+        plot.margin = margin(10, 0, 5, 0)
+  )
+
+ggdraw(bus_shape_ridership_plot) +
+  theme(panel.background = element_rect(fill = "gray10", color = NA))
+```
+
+![](bus-ridership_map_files/figure-commonmark/Map%20Ridership-1.png)
