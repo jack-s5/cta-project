@@ -1,5 +1,4 @@
-CTA L Ridership Map
-================
+# CTA L Ridership Map
 
 ``` r
 library(RSocrata)
@@ -24,7 +23,7 @@ ggplot(lines_sf) +
   geom_sf(data = stations_sf)
 ```
 
-![](cta-ridership_viz_files/figure-commonmark/Importing%20Data-1.png)
+![](L-ridership_map_files/figure-commonmark/Importing%20Data-1.png)
 
 ``` r
 monthly_riders_clean <- monthly_riders %>% 
@@ -122,7 +121,7 @@ plot_1 <- ggplot(stations_sf_riders_2022) +
     plot.margin = margin(10, 10, 10, 10)
   )
 ggdraw(plot_1) +
-  theme(panel.background = element_rect(fill = "gray10", color = NA))
+  theme(panel.background = element_rect(fill = "gray10", color = "gray10"))
 ```
 
-![](cta-ridership_viz_files/figure-commonmark/Plotting-1.png)
+![](L-ridership_map_files/figure-commonmark/Plotting-1.png)
