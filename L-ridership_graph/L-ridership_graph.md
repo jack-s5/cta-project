@@ -104,7 +104,7 @@ ggplot(
   )
 ```
 
-![](cta-line-ridership_files/figure-commonmark/highest%20ridership%20graph-1.png)
+![](L-ridership_graph_files/figure-commonmark/highest%20ridership%20graph-1.png)
 
 First defined every station part of each line/the loop. Then used those
 vectors to give them a new value in a new column `line`. Finally grouped
@@ -272,4 +272,4 @@ ggplot(totals_2022) +
     Warning: Using the `size` aesthetic in this geom was deprecated in ggplot2 3.4.0.
     ℹ Please use `linewidth` in the `default_aes` field and elsewhere instead.
 
-![](cta-line-ridership_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Graph-1.png)
+![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Graph-1.png)
