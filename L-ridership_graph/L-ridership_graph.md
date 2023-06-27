@@ -116,11 +116,12 @@ purple_stations <- c('Linden', 'Central-Evanston', 'Noyes', 'Foster', 'Davis', '
 yellow_stations <- c('Dempster-Skokie', 'Oakton-Skokie')
 blue_stations <- c("O'Hare Airport", 'Rosemont', 'Cumberland', "Harlem-O'Hare", 'Jefferson Park', "Montrose-O'Hare", "Irving Park-O'Hare", "Addison-O'Hare", "Belmont-O'Hare", 'Logan Square', 'California/Milwaukee', 'Western/Milwaukee', 'Damen/Milwaukee', 'Division/Milwaukee', 'Chicago/Milwaukee', 'Grand/Milwaukee', 'Washington/Dearborn', 'Monroe/Dearborn', 'Jackson/Dearborn', 'LaSalle', 'Clinton-Forest Park', 'UIC-Halsted', 'Racine', 'Medical Center', 'Western-Forest Park', 'Kedzie-Homan-Forest Park', 'Pulaski-Forest Park', 'Cicero-Forest Park', 'Austin-Forest Park', 'Oak Park-Forest Park', 'Harlem-Forest Park', 'Forest Park')
 pink_stations <- c('Polk', '18th', 'Damen-Cermak', 'Western-Cermak', 'California-Cermak', 'Kedzie-Cermak', 'Central Park', 'Pulaski-Cermak', 'Kostner', 'Cicero-Cermak', '54th/Cermak')
-green_stations <- c('Harlem-Lake', 'Oak Park-Lake', 'Ridgeland', 'Austin-Lake', 'Central-Lake', 'Laramie', 'Cicero-Lake', 'Pulaski-Lake', 'Conservatory', 'Kedzie-Lake', 'California-Lake', 'Ashland-Lake', 'Morgan-Lake', 'Clinton-Lake', 'Cermak-McCormick Place', '35-Bronzeville-IIT', 'Indiana', '43rd', '47th-South Elevated', '51st', 'Garfield-South Elevated', 'King Drive', 'East 63rd-Cottage Grove', 'Halsted/63rd', 'Ashland/63rd')
+green_stations <- c('Harlem-Lake', 'Oak Park-Lake', 'Ridgeland', 'Austin-Lake', 'Central-Lake', 'Laramie', 'Cicero-Lake', 'Pulaski-Lake', 'Conservatory', 'Kedzie-Lake', 'California-Lake', 'Cermak-McCormick Place', '35-Bronzeville-IIT', 'Indiana', '43rd', '47th-South Elevated', '51st', 'Garfield-South Elevated', 'King Drive', 'East 63rd-Cottage Grove', 'Halsted/63rd', 'Ashland/63rd')
 brown_stations <- c('Kimball', 'Kedzie-Brown', 'Francisco', 'Rockwell', 'Western-Brown', 'Damen-Brown', 'Montrose-Brown', 'Irving Park-Brown', 'Addison-Brown', 'Paulina', 'Southport', 'Wellington', 'Diversey', 'Armitage', 'Sedgwick', 'Chicago/Franklin', 'Merchandise Mart')
 orange_stations <- c('Midway Airport', 'Pulaski-Orange', 'Kedzie-Midway', 'Western-Orange', '35th/Archer', 'Ashland-Orange', 'Halsted-Orange')
 loop_stations <- c('Washington/Wells', 'Quincy/Wells', 'LaSalle/Van Buren', 'Library', 'Adams/Wabash', 'Washington/Wabash', 'State/Lake', 'Clark/Lake')
 # sorry for that
+# green / pink transfers: 'Ashland-Lake', 'Morgan-Lake', 'Clinton-Lake'
 
 totals_2022 <- yearly_riders_2022 %>% 
   mutate(
@@ -143,7 +144,16 @@ totals_2022 <- yearly_riders_2022 %>%
 
 # Adding a line break to the "Transfer Station" label so it doesn't look
 # messy on the graph.
-labels <- c("Red", "Blue", "Loop", "Brown", "Transfer\nStations", "Green", "Orange", "Pink", "Purple", "Yellow")
+labels <- c("Red" = "Red", 
+            "Blue" = "Blue", 
+            "Loop" = "Loop", 
+            "Brown" = "Brown", 
+            "Transfer Stations" = "Transfer\nStations", 
+            "Green" = "Green", 
+            "Orange" = "Orange", 
+            "Pink" = "Pink", 
+            "Purple" = "Purple", 
+            "Yellow" = "Yellow")
 ```
 
 Graph it B)
@@ -157,7 +167,7 @@ ggplot(totals_2022) +
     stat = "identity"
   ) +
   labs(
-    title = "Ridership of 'L' Lines (& Loop Stations) in 2022",
+    title = "The Red & Blue Lines Have Far and Away the\nHighest Ridership of CTA 'L' Lines",
     y = "Total Riders",
     x = ""
   ) +
@@ -263,7 +273,7 @@ ggplot(totals_2022) +
     color = "white",
     fill = "gray17",
     family = "Space Grotesk",
-    label = "All transfer stations lie on \nthe Red Line, meaning its \nridership is likely higher!",
+    label = "Most transfer stations lie on \nthe Red Line, meaning its \nridership is likely even higher!",
     hjust = 0,
     label.size = NA # remove border from surrounding rectangle
   )
@@ -272,4 +282,107 @@ ggplot(totals_2022) +
     Warning: Using the `size` aesthetic in this geom was deprecated in ggplot2 3.4.0.
     ℹ Please use `linewidth` in the `default_aes` field and elsewhere instead.
 
-![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Graph-1.png)
+![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Bar%20Graph-1.png)
+
+``` r
+yearly_line_riders_2022 <- yearly_riders_2022 %>% 
+  mutate(
+    line = fct(case_when(
+              station_name %in% red_stations ~ "Red",
+              station_name %in% purple_stations ~ "Purple",
+              station_name %in% yellow_stations ~ "Yellow",
+              station_name %in% blue_stations ~ "Blue",
+              station_name %in% pink_stations ~ "Pink",
+              station_name %in% green_stations ~ "Green", 
+              station_name %in% brown_stations ~ "Brown",
+              station_name %in% orange_stations ~ "Orange",
+              station_name %in% loop_stations ~ "Loop",
+              TRUE ~ "Transfer Stations"
+           ))
+  ) %>% 
+  filter(yearly_riders != 0) %>% 
+  mutate(
+    line = fct_reorder(line, yearly_riders, .fun = "median") # sort lines by median station ridership
+  )
+
+ggplot(
+  yearly_line_riders_2022,
+  aes(x = fct_rev(line),
+      y = yearly_riders,
+      group = line,
+      color = line)
+  ) +
+  geom_boxplot(
+    aes(fill = line),
+    alpha = 0.5,
+    outlier.shape = NA,
+    show.legend = FALSE
+  ) +
+  geom_jitter(
+    alpha = 0.7,
+    size = 3.5,
+    show.legend = FALSE
+  ) +
+  labs(
+    title = "Loop and Non-Loop Transfer Stations Have Higher\nMedian Ridership Than Single-Line Stations",
+    y = "Yearly Riders"
+  ) +
+  scale_y_continuous(
+    labels = scales::label_number(scale_cut = cut_short_scale()), # turns into "1M", "2M", etc
+    expand = c(0,0) # forces start at origin
+  ) +
+  scale_x_discrete(
+    labels = labels
+  ) +
+  coord_cartesian(
+    ylim = c(0, 3250000)
+  ) +
+  scale_color_manual(
+    values = c("Red" = "#c60c30",
+               "Blue" = "#00a1de",
+               "Transfer Stations" = "#8a7576",
+               "Brown" = "#62361b",
+               "Loop" = "gray40",
+               "Green" = "#009b3a",
+               "Orange" = "#ed831f",
+               "Pink" = "#e27ea6",
+               "Purple" = "#522398",
+               "Yellow" = "#f9e300")
+  ) +
+  scale_fill_manual(
+    values = c("Red" = "#c60c30",
+               "Blue" = "#00a1de",
+               "Transfer Stations" = "#8a7576",
+               "Brown" = "#62361b",
+               "Loop" = "gray40",
+               "Green" = "#009b3a",
+               "Orange" = "#ed831f",
+               "Pink" = "#e27ea6",
+               "Purple" = "#522398",
+               "Yellow" = "#f9e300")
+  ) +
+  theme(plot.background = element_rect(color = "gray10",
+                                       fill = "gray10"),
+        panel.background = element_blank(),
+        
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(linewidth = 0.25),
+        
+        plot.title = element_text(color = "white",
+                                  family = "Space Grotesk Bold",
+                                  size = 19),
+        
+        axis.title.y = element_text(color = "gray75",
+                                    family = "Space Grotesk Bold"),
+        axis.text = element_text(color = "gray60",
+                                 family = "Space Grotesk"),
+        axis.text.x = element_text(
+                        angle = 45,
+                        hjust = 1),
+        
+        legend.position = "none",
+        plot.margin = margin(10, 10, 0, 10)
+  )
+```
+
+![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20&%20Station%20Box/Scatterplot-1.png)
