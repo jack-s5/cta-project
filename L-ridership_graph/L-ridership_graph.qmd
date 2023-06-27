@@ -180,7 +180,7 @@ ggplot(totals_2022) +
     stat = "identity"
   ) +
   labs(
-    title = "The Red & Blue Lines have Far and Away the\nHighest Ridership of CTA 'L' Lines",
+    title = "The Red & Blue Lines Have Far and Away the\nHighest Ridership of CTA 'L' Lines",
     y = "Total Riders",
     x = ""
   ) +
@@ -335,7 +335,8 @@ ggplot(
     show.legend = FALSE
   ) +
   labs(
-    title = ""
+    title = "Loop and Non-Loop Transfer Stations Have Higher\nMedian Ridership Than Single-Line Stations",
+    y = "Yearly Riders"
   ) +
   scale_y_continuous(
     labels = scales::label_number(scale_cut = cut_short_scale()), # turns into "1M", "2M", etc
@@ -380,7 +381,7 @@ ggplot(
         
         plot.title = element_text(color = "white",
                                   family = "Space Grotesk Bold",
-                                  size = 20),
+                                  size = 19),
         
         axis.title.y = element_text(color = "gray75",
                                     family = "Space Grotesk Bold"),
