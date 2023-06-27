@@ -62,8 +62,7 @@ ggplot(
     stat = "identity"
   ) +
   labs(
-    title = "CTA Stations with 1.5M+ Riders in 2022",
-    subtitle = "Color-Coded by Line (Transfer/Loop as Gray)",
+    title = "The Red Line Dominates the Most-Ridden CTA\nStations List",
     x = "",
     y = ""
   ) +
@@ -80,8 +79,8 @@ ggplot(
                 "#c60c30",
                 "#00a1de",
                 "gray",
-                "gray",
                 "#c60c30",
+                "gray",
                 "gray",
                 "gray",
                 "#c60c30",
@@ -98,12 +97,11 @@ ggplot(
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(linewidth = 0.25),
         
+        plot.title.position = "plot",
         plot.title = element_text(color = "white",
-                                  family = "Space Grotesk Bold",
+                                  family = "Space Grotesk",
+                                  face = "bold",
                                   size = 20),
-        plot.subtitle = element_text(color = "gray90",
-                                     family = "Space Grotesk",
-                                     size = 12.5),
         
         axis.text = element_text(color = "gray60",
                                  family = "Space Grotesk"),
@@ -112,8 +110,11 @@ ggplot(
                         hjust = 1),
         
         legend.position = "none",
-        plot.margin = margin(10, 10, 0, 0)
+        plot.margin = margin(10, 10, 0, 10)
   )
+
+# ggsave(here("L-ridership_graph", "station-ridership_bar-graph.png"), width = 8, units = "in")
+
 ```
 
 First defined every station part of each line/the loop. Then used those vectors
@@ -181,7 +182,7 @@ ggplot(totals_2022) +
     stat = "identity"
   ) +
   labs(
-    title = "The Red & Blue Lines Have Far and Away the\nHighest Ridership of CTA 'L' Lines",
+    title = "The Red & Blue Lines Have Far and Away the Highest\nRidership of All CTA 'L' Lines",
     y = "Total Riders",
     x = ""
   ) +
@@ -211,12 +212,15 @@ ggplot(totals_2022) +
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(linewidth = 0.25),
         
+        plot.title.position = "plot",
         plot.title = element_text(color = "white",
-                                  family = "Space Grotesk Bold",
+                                  family = "Space Grotesk",
+                                  face = "bold",
                                   size = 20),
         
         axis.title.y = element_text(color = "gray75",
-                                    family = "Space Grotesk Bold"),
+                                    family = "Space Grotesk",
+                                    face = "bold"),
         axis.text = element_text(color = "gray60",
                                  family = "Space Grotesk"),
         axis.text.x = element_text(
@@ -291,7 +295,8 @@ ggplot(totals_2022) +
     hjust = 0,
     label.size = NA # remove border from surrounding rectangle
   )
-  
+
+# ggsave(here("L-ridership_graph", "L-ridership_bar-graph.png"), width = 8, units = "in")
 ```
 
 ```{r}

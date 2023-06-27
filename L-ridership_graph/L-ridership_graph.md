@@ -8,6 +8,7 @@ library(tidyverse)
 library(here)
 library(scales)
 library(ggforce)
+library(showtext)
 ```
 
 Import data.
@@ -50,8 +51,7 @@ ggplot(
     stat = "identity"
   ) +
   labs(
-    title = "CTA Stations with 1.5M+ Riders in 2022",
-    subtitle = "Color-Coded by Line (Transfer/Loop as Gray)",
+    title = "The Red Line Dominates the Most-Ridden CTA\nStations List",
     x = "",
     y = ""
   ) +
@@ -68,8 +68,8 @@ ggplot(
                 "#c60c30",
                 "#00a1de",
                 "gray",
-                "gray",
                 "#c60c30",
+                "gray",
                 "gray",
                 "gray",
                 "#c60c30",
@@ -86,12 +86,11 @@ ggplot(
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(linewidth = 0.25),
         
+        plot.title.position = "plot",
         plot.title = element_text(color = "white",
-                                  family = "Space Grotesk Bold",
+                                  family = "Space Grotesk",
+                                  face = "bold",
                                   size = 20),
-        plot.subtitle = element_text(color = "gray90",
-                                     family = "Space Grotesk",
-                                     size = 12.5),
         
         axis.text = element_text(color = "gray60",
                                  family = "Space Grotesk"),
@@ -100,11 +99,15 @@ ggplot(
                         hjust = 1),
         
         legend.position = "none",
-        plot.margin = margin(10, 10, 0, 0)
+        plot.margin = margin(10, 10, 0, 10)
   )
 ```
 
 ![](L-ridership_graph_files/figure-commonmark/highest%20ridership%20graph-1.png)
+
+``` r
+# ggsave(here("L-ridership_graph", "station-ridership_bar-graph.png"), width = 8, units = "in")
+```
 
 First defined every station part of each line/the loop. Then used those
 vectors to give them a new value in a new column `line`. Finally grouped
@@ -167,7 +170,7 @@ ggplot(totals_2022) +
     stat = "identity"
   ) +
   labs(
-    title = "The Red & Blue Lines Have Far and Away the\nHighest Ridership of CTA 'L' Lines",
+    title = "The Red & Blue Lines Have Far and Away the Highest\nRidership of All CTA 'L' Lines",
     y = "Total Riders",
     x = ""
   ) +
@@ -197,12 +200,15 @@ ggplot(totals_2022) +
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(linewidth = 0.25),
         
+        plot.title.position = "plot",
         plot.title = element_text(color = "white",
-                                  family = "Space Grotesk Bold",
+                                  family = "Space Grotesk",
+                                  face = "bold",
                                   size = 20),
         
         axis.title.y = element_text(color = "gray75",
-                                    family = "Space Grotesk Bold"),
+                                    family = "Space Grotesk",
+                                    face = "bold"),
         axis.text = element_text(color = "gray60",
                                  family = "Space Grotesk"),
         axis.text.x = element_text(
@@ -285,6 +291,10 @@ ggplot(totals_2022) +
 ![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Bar%20Graph-1.png)
 
 ``` r
+# ggsave(here("L-ridership_graph", "L-ridership_bar-graph.png"), width = 8, units = "in")
+```
+
+``` r
 yearly_line_riders_2022 <- yearly_riders_2022 %>% 
   mutate(
     line = fct(case_when(
@@ -305,7 +315,9 @@ yearly_line_riders_2022 <- yearly_riders_2022 %>%
     line = fct_reorder(line, yearly_riders, .fun = "median") # sort lines by median station ridership
   )
 
-ggplot(
+
+
+line_ridership_scatterbox <- ggplot(
   yearly_line_riders_2022,
   aes(x = fct_rev(line),
       y = yearly_riders,
@@ -324,7 +336,7 @@ ggplot(
     show.legend = FALSE
   ) +
   labs(
-    title = "Loop and Non-Loop Transfer Stations Have Higher\nMedian Ridership Than Single-Line Stations",
+    title = "Loop and Non-Loop Transfer Stations Have Higher Median\nRidership Than Single-Line Stations",
     y = "Yearly Riders"
   ) +
   scale_y_continuous(
@@ -368,12 +380,16 @@ ggplot(
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(linewidth = 0.25),
         
+        plot.title.position = "plot",
         plot.title = element_text(color = "white",
-                                  family = "Space Grotesk Bold",
+                                  family = "Space Grotesk",
+                                  face = "bold",
                                   size = 19),
         
+        axis.title.x = element_blank(),
         axis.title.y = element_text(color = "gray75",
-                                    family = "Space Grotesk Bold"),
+                                    family = "Space Grotesk",
+                                    face = "bold"),
         axis.text = element_text(color = "gray60",
                                  family = "Space Grotesk"),
         axis.text.x = element_text(
@@ -383,6 +399,12 @@ ggplot(
         legend.position = "none",
         plot.margin = margin(10, 10, 0, 10)
   )
+
+line_ridership_scatterbox
 ```
 
 ![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20&%20Station%20Box/Scatterplot-1.png)
+
+``` r
+# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), plot = line_ridership_scatterbox, width = 8, units = "in")
+```
