@@ -15,6 +15,7 @@ library(tidyverse)
 library(here)
 library(scales)
 library(ggforce)
+library(showtext)
 ```
 
 Import data.
@@ -316,7 +317,9 @@ yearly_line_riders_2022 <- yearly_riders_2022 %>%
     line = fct_reorder(line, yearly_riders, .fun = "median") # sort lines by median station ridership
   )
 
-ggplot(
+
+
+line_ridership_scatterbox <- ggplot(
   yearly_line_riders_2022,
   aes(x = fct_rev(line),
       y = yearly_riders,
@@ -335,7 +338,7 @@ ggplot(
     show.legend = FALSE
   ) +
   labs(
-    title = "Loop and Non-Loop Transfer Stations Have Higher\nMedian Ridership Than Single-Line Stations",
+    title = "Loop and Non-Loop Transfer Stations Have Higher Median\nRidership Than Single-Line Stations",
     y = "Yearly Riders"
   ) +
   scale_y_continuous(
@@ -379,12 +382,16 @@ ggplot(
         panel.grid.major.x = element_blank(),
         panel.grid.major.y = element_line(linewidth = 0.25),
         
+        plot.title.position = "plot",
         plot.title = element_text(color = "white",
-                                  family = "Space Grotesk Bold",
+                                  family = "Space Grotesk",
+                                  face = "bold",
                                   size = 19),
         
+        axis.title.x = element_blank(),
         axis.title.y = element_text(color = "gray75",
-                                    family = "Space Grotesk Bold"),
+                                    family = "Space Grotesk",
+                                    face = "bold"),
         axis.text = element_text(color = "gray60",
                                  family = "Space Grotesk"),
         axis.text.x = element_text(
@@ -394,5 +401,9 @@ ggplot(
         legend.position = "none",
         plot.margin = margin(10, 10, 0, 10)
   )
+
+line_ridership_scatterbox
+
+# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), plot = line_ridership_scatterbox, width = 8, units = "in")
 ```
 
