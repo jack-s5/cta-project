@@ -191,16 +191,16 @@ ggplot(totals_2022) +
     expand = c(0,0) # forces start at origin
   ) +
   scale_fill_manual(
-    values = c("#c60c30",
-               "#00a1de",
-               "gray40",
-               "#62361b",
-               "gray40",
-               "#009b3a",
-               "#ed831f",
-               "#e27ea6",
-               "#522398",
-               "#f9e300")
+    values = c("Red" = "#c60c30",
+               "Blue" = "#00a1de",
+               "Transfer Stations" = "#8a7576",
+               "Brown" = "#62361b",
+               "Loop" = "gray40",
+               "Green" = "#009b3a",
+               "Orange" = "#ed831f",
+               "Pink" = "#e27ea6",
+               "Purple" = "#522398",
+               "Yellow" = "#f9e300")
   ) +
   scale_x_discrete(
     labels = labels
@@ -408,6 +408,6 @@ ggplot(
         plot.margin = margin(10, 10, 0, 10)
   )
 
-ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), width = 8, units = "in")
+# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), width = 8, units = "in")
 ```
 

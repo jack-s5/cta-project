@@ -51,7 +51,7 @@ ggplot(
     stat = "identity"
   ) +
   labs(
-    title = "The Red Line Dominates the Most-Ridden CTA\nStations List",
+    title = "The Red Line Dominates 2022's Most-Ridden CTA\nStations",
     x = "",
     y = ""
   ) +
@@ -170,7 +170,7 @@ ggplot(totals_2022) +
     stat = "identity"
   ) +
   labs(
-    title = "The Red & Blue Lines Have Far and Away the Highest\nRidership of All CTA 'L' Lines",
+    title = "The Red & Blue Lines Have Far and Away the Highest\n2022 Ridership of All CTA 'L' Lines",
     y = "Total Riders",
     x = ""
   ) +
@@ -179,16 +179,16 @@ ggplot(totals_2022) +
     expand = c(0,0) # forces start at origin
   ) +
   scale_fill_manual(
-    values = c("#c60c30",
-               "#00a1de",
-               "gray40",
-               "#62361b",
-               "gray40",
-               "#009b3a",
-               "#ed831f",
-               "#e27ea6",
-               "#522398",
-               "#f9e300")
+    values = c("Red" = "#c60c30",
+               "Blue" = "#00a1de",
+               "Transfer Stations" = "#8a7576",
+               "Brown" = "#62361b",
+               "Loop" = "gray40",
+               "Green" = "#009b3a",
+               "Orange" = "#ed831f",
+               "Pink" = "#e27ea6",
+               "Purple" = "#522398",
+               "Yellow" = "#f9e300")
   ) +
   scale_x_discrete(
     labels = labels
@@ -291,8 +291,10 @@ ggplot(totals_2022) +
 ![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Bar%20Graph-1.png)
 
 ``` r
-# ggsave(here("L-ridership_graph", "L-ridership_bar-graph.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "L-ridership_bar-graph.png"), width = 8, units = "in")
 ```
+
+    Saving 8 x 5.33 in image
 
 ``` r
 yearly_line_riders_2022 <- yearly_riders_2022 %>% 
@@ -314,10 +316,10 @@ yearly_line_riders_2022 <- yearly_riders_2022 %>%
   mutate(
     line = fct_reorder(line, yearly_riders, .fun = "median") # sort lines by median station ridership
   )
+```
 
-
-
-line_ridership_scatterbox <- ggplot(
+``` r
+ggplot(
   yearly_line_riders_2022,
   aes(x = fct_rev(line),
       y = yearly_riders,
@@ -336,7 +338,7 @@ line_ridership_scatterbox <- ggplot(
     show.legend = FALSE
   ) +
   labs(
-    title = "Loop and Non-Loop Transfer Stations Have Higher Median\nRidership Than Single-Line Stations",
+    title = "Loop and Non-Loop Transfer Stations Have Higher Median\n2022 Ridership Than Single-Line Stations",
     y = "Yearly Riders"
   ) +
   scale_y_continuous(
@@ -399,12 +401,10 @@ line_ridership_scatterbox <- ggplot(
         legend.position = "none",
         plot.margin = margin(10, 10, 0, 10)
   )
-
-line_ridership_scatterbox
 ```
 
 ![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20&%20Station%20Box/Scatterplot-1.png)
 
 ``` r
-# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), plot = line_ridership_scatterbox, width = 8, units = "in")
+# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), width = 8, units = "in")
 ```
