@@ -106,8 +106,10 @@ ggplot(
 ![](L-ridership_graph_files/figure-commonmark/highest%20ridership%20graph-1.png)
 
 ``` r
-# ggsave(here("L-ridership_graph", "station-ridership_bar-graph.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "plots", "station-ridership_bar-graph.png"), width = 8, units = "in")
 ```
+
+    Saving 8 x 5.33 in image
 
 First defined every station part of each line/the loop. Then used those
 vectors to give them a new value in a new column `line`. Finally grouped
@@ -291,7 +293,7 @@ ggplot(totals_2022) +
 ![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20Bar%20Graph-1.png)
 
 ``` r
-ggsave(here("L-ridership_graph", "L-ridership_bar-graph.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "plots", "L-ridership_bar-graph.png"), width = 8, units = "in")
 ```
 
     Saving 8 x 5.33 in image
@@ -406,5 +408,7 @@ ggplot(
 ![](L-ridership_graph_files/figure-commonmark/Ridership%20by%20CTA%20Line%20&%20Station%20Box/Scatterplot-1.png)
 
 ``` r
-# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "plots", "L-ridership_scatterbox.png"), width = 8, units = "in")
 ```
+
+    Saving 8 x 5 in image

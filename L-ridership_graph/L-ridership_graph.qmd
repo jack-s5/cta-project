@@ -113,7 +113,7 @@ ggplot(
         plot.margin = margin(10, 10, 0, 10)
   )
 
-# ggsave(here("L-ridership_graph", "station-ridership_bar-graph.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "plots", "station-ridership_bar-graph.png"), width = 8, units = "in")
 
 ```
 
@@ -296,7 +296,7 @@ ggplot(totals_2022) +
     label.size = NA # remove border from surrounding rectangle
   )
 
-# ggsave(here("L-ridership_graph", "L-ridership_bar-graph.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "plots", "L-ridership_bar-graph.png"), width = 8, units = "in")
 ```
 
 ```{r}
@@ -408,6 +408,6 @@ ggplot(
         plot.margin = margin(10, 10, 0, 10)
   )
 
-# ggsave(here("L-ridership_graph", "L-ridership_scatterbox.png"), width = 8, units = "in")
+ggsave(here("L-ridership_graph", "plots", "L-ridership_scatterbox.png"), width = 8, units = "in")
 ```
 
