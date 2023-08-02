@@ -14,8 +14,8 @@ monthly_riders <- read.socrata("https://data.cityofchicago.org/resource/t2rn-p8d
 
 # to get these KML files I downloaded the KMZ files, changed the
 # extension to .zip, and unzipped them.
-lines_sf <- read_sf(here("SHP", "CTA_RailLines", "doc.kml")) 
-stations_sf <- read_sf(here("SHP", "CTA_RailStations", "doc.kml"))
+lines_sf <- read_sf(here("data", "SHP_L-routes", "doc.kml")) 
+stations_sf <- read_sf(here("data", "SHP_L-stations", "doc.kml"))
 
 # test
 ggplot(lines_sf) +

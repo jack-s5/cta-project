@@ -14,11 +14,11 @@ library(extrafont)
 bus_ridership <- read.socrata("https://data.cityofchicago.org/resource/bynn-gwxy.csv") %>% 
   filter(month_beginning >= "2022-01-01" & month_beginning < "2023-01-01")
 
-bus_route_shapes <- read_sf(here("SHP", "CTA_BusRoutes", "doc.kml"))
+bus_route_shapes <- read_sf(here("data", "SHP_bus-routes", "doc.kml"))
 
-chicago <- read_sf(here("SHP", "SHP_chicago", "geo_export_6f93926e-339f-47f5-acfa-9e4f37b816ce.shp"))
+chicago <- read_sf(here("data", "SHP_chicago", "geo_export_6f93926e-339f-47f5-acfa-9e4f37b816ce.shp"))
 
-extrafont::font_import(paths = NULL, recursive = TRUE, prompt = TRUE, pattern = "SpaceGrotesk")
+# extrafont::font_import(paths = NULL, recursive = TRUE, prompt = TRUE, pattern = "SpaceGrotesk")
 extrafont::loadfonts()
 ```
 
