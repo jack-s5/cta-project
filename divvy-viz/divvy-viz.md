@@ -212,3 +212,13 @@ ggplot(divvy_rolling_rides,
 ```
 
 ![](divvy-viz_files/figure-commonmark/Plot%20Monthly%20Ridership-1.png)
+
+``` r
+# ggsave(
+#   here("divvy-viz", "plots", "divvy-ridership-timeseries.png"), 
+#   width = 8, 
+#   height = 5, 
+#   units = "in", 
+#   dpi = 300
+#  )
+```

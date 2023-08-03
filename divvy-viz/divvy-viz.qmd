@@ -194,4 +194,11 @@ ggplot(divvy_rolling_rides,
     label.r = unit(0, "lines")
   )
 
+# ggsave(
+#   here("divvy-viz", "plots", "divvy-ridership-timeseries.png"), 
+#   width = 8, 
+#   height = 5, 
+#   units = "in", 
+#   dpi = 300
+#  )
 ```
