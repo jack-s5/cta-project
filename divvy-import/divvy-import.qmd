@@ -17,7 +17,7 @@ library(here)
 # Old Divvy Data
 
 ```{r}
-#| label: Import Pre-2020 Data and Convert to Parquet
+#| label: Import Pre-2020 CSV and Convert to Parquet
 
 curl::multi_download(
   "https://data.cityofchicago.org/api/views/fg6s-gzvg/rows.csv?accessType=DOWNLOAD",
@@ -39,8 +39,9 @@ file.remove(here("data", "divvy", "old_divvy-trips.csv"))
 rm(old_divvy_csv)
 ```
 
+
 ```{r}
-#| label: Create Duck Database
+#| label: Create Pre-2020 Duck Database
 
 con <- DBI::dbConnect(duckdb::duckdb(), dbdir = here("data", "duckdb", "divvy.db"))
 
@@ -52,8 +53,9 @@ dbSendQuery(con, "CREATE TABLE old_divvy_trips AS SELECT * FROM old_divvy_trips"
 rm(old_divvy_pq)
 ```
 
+
 ```{r}
-#| label: Clean Pre-2019 Data 
+#| label: Clean Pre-2020 Data 
 dbListTables(con)
 old_divvy_trips <- tbl(con, "old_divvy_trips")
 
@@ -104,7 +106,7 @@ rm(rename_snake_case, divvy_col_names, map_command)
 # New Divvy Data
 
 ```{r}
-#| label: Import Post-2020 Data
+#| label: Import Post-2020 CSV
 
 # make sure folder exists to download data
 if_else(dir.exists(here("data", "divvy", "new_divvy-broken")), 0, dir.create(here("data", "divvy", "new_divvy-broken")))
@@ -165,6 +167,7 @@ walk(zip_paths, file.remove)
 rm(unzip_new_divvy, zips, zip_paths)
 ```
 
+
 ```{r}
 #| label: Import, Merge, and Write Post-2020 Data to Parquet
 
@@ -189,6 +192,7 @@ rm(new_divvy_csvs, new_divvy_csvs_paths, schema)
 unlink(here("data", "divvy", "new_divvy-broken"), recursive = TRUE)
 ```
 
+
 ```{r}
 #| label: Convert Post-2020 Data to Database
 
@@ -200,6 +204,8 @@ dbSendQuery(con, "CREATE TABLE new_divvy_trips AS SELECT * FROM new_divvy_trips"
 rm(new_divvy_pq)
 ```
 
+Note that the electric bikes often do not have start station names because they can be picked up anywhere.
+
 ```{r}
 #| label: EDA
 
@@ -207,6 +213,18 @@ new_divvy_trips <- tbl(con, "new_divvy_trips")
 new_divvy_trips %>% 
   group_by(start_station_name) %>% 
   count()
+
+# clean
+rm(new_divvy_trips)
+DBI::dbDisconnect(con)
+rm(con)
 ```
 
-Note that the electric bikes often do not have start station names because they can be picked up anywhere.
+
+
+
+
+
+
+
+
