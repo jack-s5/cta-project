@@ -1,0 +1,212 @@
+---
+title: "Divvy Trips"
+format: gfm
+---
+
+```{r}
+#| label: setup
+#| results: hide
+library(tidyverse)
+library(duckdb)
+library(arrow)
+library(DBI)
+library(dbplyr)
+library(here)
+```
+
+# Old Divvy Data
+
+```{r}
+#| label: Import Pre-2020 Data and Convert to Parquet
+
+curl::multi_download(
+  "https://data.cityofchicago.org/api/views/fg6s-gzvg/rows.csv?accessType=DOWNLOAD",
+  here("data", "divvy", "old_divvy-trips.csv"),
+  resume = TRUE
+)
+
+old_divvy_csv <- open_dataset(
+  sources = here("data", "divvy", "old_divvy-trips.csv"),
+  format = "csv"
+)
+
+old_divvy_csv %>%
+  group_by(`USER TYPE`) %>% 
+  write_dataset(path = here("data", "divvy", "old_divvy-trips_pq"), format = "parquet")
+
+# clean
+file.remove(here("data", "divvy", "old_divvy-trips.csv"))
+rm(old_divvy_csv)
+```
+
+```{r}
+#| label: Create Duck Database
+
+con <- DBI::dbConnect(duckdb::duckdb(), dbdir = here("data", "duckdb", "divvy.db"))
+
+old_divvy_pq <- open_dataset(here("data", "divvy", "old_divvy-trips_pq"))
+arrow::to_duckdb(old_divvy_pq, table_name = "old_divvy_trips", con = con)
+dbSendQuery(con, "CREATE TABLE old_divvy_trips AS SELECT * FROM old_divvy_trips") # this took forever idk why
+
+# clean
+rm(old_divvy_pq)
+```
+
+```{r}
+#| label: Clean Pre-2019 Data 
+dbListTables(con)
+old_divvy_trips <- tbl(con, "old_divvy_trips")
+
+# current names are "STOP TIME" "BIKE ID" etc and annoying to work with
+# so we rename
+rename_snake_case <- function(x) {
+  snake <- str_replace_all(str_to_lower(x), " ", "_")
+  return(snake)
+}
+
+divvy_col_names <- colnames(old_divvy_trips)
+# have to create a named vector to pair with rename
+map_command <- set_names(divvy_col_names, map_vec(divvy_col_names, rename_snake_case))
+
+old_divvy_clean <- old_divvy_trips %>% 
+  # three ! to "unquote" the string; literally evaluate the names of the vector as
+  # the names of the column
+  # otherwise it runs the whole "name" = "val" as `"name" = "val"`
+  rename(!!! map_command)
+
+# send to db
+compute(old_divvy_clean, name = "old_divvy_clean", temporary = "FALSE")
+
+# turn "date" columns into actual datetimes
+dbSendQuery(
+  con,
+  "ALTER TABLE old_divvy_clean ADD start_datetime DATETIME null;
+   UPDATE old_divvy_clean SET start_datetime=strptime(start_time, '%m/%d/%Y %I:%M:%S %p');
+   ALTER TABLE old_divvy_clean DROP start_time"
+ )
+dbSendQuery(
+  con, 
+  "ALTER TABLE old_divvy_clean ADD stop_datetime DATETIME null;
+   UPDATE old_divvy_clean SET stop_datetime=strptime(stop_time, '%m/%d/%Y %I:%M:%S %p');
+   ALTER TABLE old_divvy_clean DROP stop_time"
+ )
+dbSendQuery(
+  con,
+  "DROP TABLE old_divvy_trips;
+   ALTER TABLE old_divvy_clean RENAME TO old_divvy_trips"
+)
+
+#clean
+rm(old_divvy_trips, old_divvy_clean)
+rm(rename_snake_case, divvy_col_names, map_command)
+```
+
+# New Divvy Data
+
+```{r}
+#| label: Import Post-2020 Data
+
+# make sure folder exists to download data
+if_else(dir.exists(here("data", "divvy", "new_divvy-broken")), 0, dir.create(here("data", "divvy", "new_divvy-broken")))
+
+download_new_divvy <- function(year, month) {
+  link <- glue::glue("https://divvy-tripdata.s3.amazonaws.com/{year}{month}-divvy-tripdata.zip")
+  filename <- glue::glue("{year}-{month}_divvy-trips.zip")
+  
+  print(link)
+  print(filename)
+  
+  curl::multi_download(
+    link,
+    here::here("data", "divvy", "new_divvy-broken", filename),
+    resume = TRUE
+  )
+  
+  # trying to download files that don't exist results in a tiny webpage file
+  # so we delete those
+  if (file.info(here("data", "divvy", "new_divvy-broken", filename))$size < 1000) { 
+    file.remove(here("data", "divvy", "new_divvy-broken", filename)) 
+  }
+}
+
+years <- seq(2020, 2023)
+months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
+
+# have to define .y (the iterated variable) as the previous .x
+# these are akin to the `for "year" in years` or `for "month" in months"
+walk(years, ~ walk(months, ~ download_new_divvy(.y, .x), .y = .x))
+
+
+curl::multi_download(
+  "https://divvy-tripdata.s3.amazonaws.com/Divvy_Trips_2020_Q1.zip",
+  here::here("data", "divvy", "new_divvy-broken", "2020Q1_divvy-trips.zip"),
+  resume = TRUE
+)
+
+#clean
+rm(download_new_divvy, years, months)
+```
+
+
+```{r}
+#| label: Unzip Post-2020 Data
+
+zips <- list.files(here("data", "divvy", "new_divvy-broken"), pattern = "*.zip")
+zip_paths <- glue::glue("{here('data', 'divvy', 'new_divvy-broken')}/{zips}")
+
+unzip_new_divvy <- function(path) {
+  unzip(path, exdir = here("data", "divvy", "new_divvy-broken"))
+}
+
+walk(zip_paths, unzip_new_divvy)
+
+# clean
+walk(zip_paths, file.remove)
+rm(unzip_new_divvy, zips, zip_paths)
+```
+
+```{r}
+#| label: Import, Merge, and Write Post-2020 Data to Parquet
+
+new_divvy_csvs <- list.files(here("data", "divvy", "new_divvy-broken"), pattern = "*.csv")
+new_divvy_csvs_paths <- glue::glue("{here('data', 'divvy', 'new_divvy-broken')}/{new_divvy_csvs}")
+
+new_divvy_csvs_merged <- open_csv_dataset(new_divvy_csvs_paths)
+
+schema <- new_divvy_csvs_merged$schema
+schema[[6]] <- Field$create("start_station_id", string())
+schema[[8]] <- Field$create("end_station_id", string())
+
+new_divvy_csvs_merged <- open_csv_dataset(new_divvy_csvs_paths, skip = 1, schema = schema)
+
+new_divvy_csvs_merged %>% 
+  group_by(member_casual) %>% 
+  write_dataset(path = here("data", "divvy", "new_divvy-trips_pq"), format = "parquet")
+
+# clean
+rm(new_divvy_csvs_merged)
+rm(new_divvy_csvs, new_divvy_csvs_paths, schema)
+unlink(here("data", "divvy", "new_divvy-broken"), recursive = TRUE)
+```
+
+```{r}
+#| label: Convert Post-2020 Data to Database
+
+new_divvy_pq <- open_dataset(here("data", "divvy", "new_divvy-trips_pq"))
+arrow::to_duckdb(new_divvy_pq, table_name = "new_divvy_trips", con = con)
+dbSendQuery(con, "CREATE TABLE new_divvy_trips AS SELECT * FROM new_divvy_trips")
+
+# clean
+rm(new_divvy_pq)
+```
+
+```{r}
+#| label: EDA
+
+new_divvy_trips <- tbl(con, "new_divvy_trips")
+new_divvy_trips %>% 
+  group_by(start_station_name) %>% 
+  count()
+```
+
+Note that the electric bikes often do not have start station names because they can be picked up anywhere.
