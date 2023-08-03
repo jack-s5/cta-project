@@ -81,7 +81,6 @@ divvy_rolling_rides <- divvy_rides %>%
 
 # clean
 rm(old_clean, new_clean)
-DBI::dbDisconnect(con)
 ```
 
 ``` r
@@ -89,8 +88,8 @@ ggplot(divvy_rolling_rides,
        aes(x = date, y = rides)) + 
   # daily riders line
   geom_line(
-    color = "white",
-    alpha = 0.2
+    aes(color = "white", 
+        alpha = 0.2)
   ) +
   # daily riders area
   geom_area(
@@ -99,16 +98,31 @@ ggplot(divvy_rolling_rides,
   ) +
   # rolling riders line
   geom_line(
-    aes(x = date, y = roll_rides),
-    color = "#41b6e6",
+    aes(x = date, y = roll_rides, 
+        color = "#41b6e6",
+        alpha = 1),
     linewidth = 1,
     inherit.aes = FALSE
+  ) +
+  
+  # legend
+  scale_color_identity(
+    guide = "legend",
+    name = "",
+    breaks = c("white", "#41b6e6"),
+    labels = c("Daily Riders", "7-Day Moving Average")
+  ) +
+  scale_alpha_identity(
+    guide = "legend",
+    name = "",
+    breaks = c(0.2, 1),
+    labels = c("Daily Riders", "7-Day Moving Average")
   ) +
   
   labs(
     title = "Divvy Ridership Exploded Following Expansions and the\nIntroduction of E-Bikes",
     x = "Date",
-    y = "Riders"
+    y = "Daily Riders"
   ) +
   
   coord_cartesian(
@@ -151,6 +165,15 @@ ggplot(divvy_rolling_rides,
     
     axis.ticks.x = element_blank(),
     axis.ticks.y = element_blank(),
+    
+    legend.background = element_blank(),
+    legend.text = element_text(family = "Space Grotesk",
+                               color = "white"),
+    legend.key = element_blank(),
+    legend.position = "bottom",
+    legend.margin = margin(0, 0, 0, 0),
+    legend.box.margin = margin(-10, 0, 0, 0),
+    
     plot.margin = margin(5, 5, 5, 5)
   ) +
   
@@ -215,10 +238,10 @@ ggplot(divvy_rolling_rides,
 
 ``` r
 # ggsave(
-#   here("divvy-viz", "plots", "divvy-ridership-timeseries.png"), 
-#   width = 8, 
-#   height = 5, 
-#   units = "in", 
+#   here("divvy-viz", "plots", "divvy-ridership-timeseries.png"),
+#   width = 8,
+#   height = 5,
+#   units = "in",
 #   dpi = 300
 #  )
 ```
