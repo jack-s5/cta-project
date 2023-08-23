@@ -1,4 +1,4 @@
-# Divvy vs. Taxi
+# Divvy Viz
 
 ``` r
 library(tidyverse)
@@ -33,8 +33,20 @@ library(zoo)
         as.Date, as.Date.numeric
 
 ``` r
-con <- DBI::dbConnect(duckdb::duckdb(), dbdir = here("data", "duckdb", "divvy.db"))
+library(sf)
+```
 
+    Linking to GEOS 3.11.0, GDAL 3.5.3, PROJ 9.1.0; sf_use_s2() is TRUE
+
+``` r
+set.seed(20040808)
+```
+
+``` r
+con <- DBI::dbConnect(duckdb::duckdb(), dbdir = here("data", "duckdb", "divvy.db"))
+```
+
+``` r
 new_dates <- tbl(con, "new_divvy_trips") %>% 
   select(started_at) %>% 
   group_by(year(started_at), month(started_at), day(started_at)) %>% 
@@ -75,12 +87,41 @@ divvy_rides <- bind_rows(old_clean, new_clean) %>%
 
 divvy_rolling_rides <- divvy_rides %>% 
   mutate(
-    roll_rides = rollmean(rides, 15, fill = NA, align = c("right"))
+    roll_rides = rollmean(rides, 14, fill = NA, align = c("right"))
   ) %>% 
   filter(!is.na(roll_rides))
 
 # clean
 rm(old_clean, new_clean)
+```
+
+``` r
+theme_set(
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(color = "gray10",
+                                    fill = "gray10"),
+    plot.background = element_rect(color = "gray10",
+                                   fill = "gray10"),
+    
+    plot.title = element_text(family = "Space Grotesk",
+                              face = "bold",
+                              color = "white",
+                              size = 18),
+    plot.title.position = "plot",
+    
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    
+    axis.ticks.x = element_blank(),
+    axis.ticks.y = element_blank(),
+    
+    plot.margin = margin(5, 5, 5, 5)
+  )
+)
 ```
 
 ``` r
@@ -110,13 +151,13 @@ ggplot(divvy_rolling_rides,
     guide = "legend",
     name = "",
     breaks = c("white", "#41b6e6"),
-    labels = c("Daily Riders", "7-Day Moving Average")
+    labels = c("Daily Riders", "Two-Week Moving Average")
   ) +
   scale_alpha_identity(
     guide = "legend",
     name = "",
     breaks = c(0.2, 1),
-    labels = c("Daily Riders", "7-Day Moving Average")
+    labels = c("Daily Riders", "Two-Week Moving Average")
   ) +
   
   labs(
@@ -145,26 +186,15 @@ ggplot(divvy_rolling_rides,
     panel.background = element_rect(color = "gray90",
                                     linewidth = 0.5,
                                     fill = "gray10"),
-    plot.background = element_rect(color = "gray10",
-                                   fill = "gray10"),
     
     panel.grid.major = element_line(color = "gray90",
                               linewidth = 0.25),
-    panel.grid.minor = element_blank(),
     
-    plot.title = element_text(family = "Space Grotesk",
-                              face = "bold",
-                              color = "white",
-                              size = 18),
-    plot.title.position = "plot",
     axis.title = element_text(family = "Space Grotesk",
                               face = "bold",
                               color = "white"),
     axis.text = element_text(family = "Space Grotesk",
                              color = "gray90"),
-    
-    axis.ticks.x = element_blank(),
-    axis.ticks.y = element_blank(),
     
     legend.background = element_blank(),
     legend.text = element_text(family = "Space Grotesk",
@@ -173,8 +203,6 @@ ggplot(divvy_rolling_rides,
     legend.position = "bottom",
     legend.margin = margin(0, 0, 0, 0),
     legend.box.margin = margin(-10, 0, 0, 0),
-    
-    plot.margin = margin(5, 5, 5, 5)
   ) +
   
   # phase 1 expansion / ebikes
@@ -234,7 +262,7 @@ ggplot(divvy_rolling_rides,
   )
 ```
 
-![](divvy-viz_files/figure-commonmark/Plot%20Monthly%20Ridership-1.png)
+![](divvy-viz_files/figure-commonmark/Rolling%20Ridership%20Plot-1.png)
 
 ``` r
 # ggsave(
@@ -245,3 +273,49 @@ ggplot(divvy_rolling_rides,
 #   dpi = 300
 #  )
 ```
+
+``` r
+coordinate_counts <- tbl(con, "new_divvy_trips") %>% 
+  filter(
+    rideable_type == "electric_bike",
+     start_lng < -80
+  ) %>% 
+  select(started_at, start_lng, start_lat) %>% 
+  slice_sample(n = 100000) %>% 
+  collect()
+
+coordinate_sf <- st_as_sf(coordinate_counts, coords = c("start_lng", "start_lat"), crs = "longlat")
+
+DBI::dbDisconnect(con, shutdown = TRUE)
+rm(con)
+```
+
+``` r
+chicago_communities <- read_sf(here::here("data", "SHP_chicago-communities", "geo_export_e07d67fa-91ce-4d30-9da3-eb903021731c.shp"))
+
+st_crs(chicago_communities) <- st_crs(coordinate_sf)
+
+ebike_locations <- ggplot(chicago_communities) + 
+  geom_sf(
+    color = "black",
+    linewidth = 0.5,
+    fill = "gray35"
+  ) +
+  geom_sf(
+    data = coordinate_sf,
+    color = "#41b6e6",
+    size = 0.5,
+    alpha = 0.025
+  ) + 
+  labs(
+    title = "E-Bike Ridership is Largely Concentrated\non the North Side and in Downtown"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5)
+  )
+
+cowplot::ggdraw(ebike_locations) +
+  theme(plot.background = element_rect(fill = "gray10", color = "gray10"))
+```
+
+![](divvy-viz_files/figure-commonmark/E-Bike%20Start%20Points%20Graph-1.png)
