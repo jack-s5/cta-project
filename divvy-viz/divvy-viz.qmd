@@ -22,8 +22,7 @@ con <- DBI::dbConnect(duckdb::duckdb(), dbdir = here("data", "duckdb", "divvy.db
 
 ```{r}
 #| label: Rolling Ridership Average
-#| cache: true
-#| dependson: c("setup", "Create Connection")
+
 new_dates <- tbl(con, "new_divvy_trips") %>% 
   select(started_at) %>% 
   group_by(year(started_at), month(started_at), day(started_at)) %>% 
@@ -107,8 +106,6 @@ theme_set(
 
 ```{r}
 #| label: Rolling Ridership Plot
-#| cache: true
-#| dependson: c("setup", "Rolling Ridership Average", "Set Theme")
 #| fig-width: 8
 #| fig-height: 5
 
@@ -259,8 +256,6 @@ ggplot(divvy_rolling_rides,
 
 ```{r}
 #| label: E-Bike Start Locations
-#| cache: true
-#| dependson: "setup"
 #| message: false
 
 coordinate_counts <- tbl(con, "new_divvy_trips") %>% 
