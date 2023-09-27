@@ -134,10 +134,10 @@ download_new_divvy <- function(year, month) {
 years <- seq(2020, 2023)
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
 
-# have to define .y (the iterated variable) as the previous .x
-# these are akin to the `for "year" in years` or `for "month" in months"
-walk(years, ~ walk(months, ~ download_new_divvy(.y, .x), .y = .x))
-
+# double for loop unfortunately
+# the majority of the runtime comes from downloading the files though
+# so should be ok
+walk(years, function(x) walk(months, function(y) download_new_divvy(x, y)))
 
 curl::multi_download(
   "https://divvy-tripdata.s3.amazonaws.com/Divvy_Trips_2020_Q1.zip",
