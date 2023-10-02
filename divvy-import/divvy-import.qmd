@@ -131,13 +131,20 @@ download_new_divvy <- function(year, month) {
   }
 }
 
-years <- seq(2020, 2023)
+# LOOKUP VECTOR BABY
+# the vector has a (year, month) pair for all years and months, which can be used
+# with our divvy function
+years <- sort(rep(seq(2020, 2023), times = 12))
 months <- c("01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12")
+months <- rep(months, times = 4)
 
-# double for loop unfortunately
-# the majority of the runtime comes from downloading the files though
-# so should be ok
-walk(years, function(x) walk(months, function(y) download_new_divvy(x, y)))
+year_months <- setNames(years, months)
+
+walk(year_months, function(x) download_new_divvy(year_months, names(year_months)))
+
+# this was the previous nested loop function
+# we don't do nested loops around here...
+# walk(years, function(x) walk(months, function(y) download_new_divvy(x, y)))
 
 curl::multi_download(
   "https://divvy-tripdata.s3.amazonaws.com/Divvy_Trips_2020_Q1.zip",
@@ -146,7 +153,7 @@ curl::multi_download(
 )
 
 #clean
-rm(download_new_divvy, years, months)
+rm(download_new_divvy, years, months, year_months)
 ```
 
 
